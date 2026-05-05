@@ -23,9 +23,14 @@ android {
 
     flavorDimensions "mode"
     productFlavors {
+        legacy {
+            dimension "mode"
+            minSdkVersion 14
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         normal {
             dimension "mode"
-            minSdkVersion 16
+            minSdkVersion 14
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         python {
@@ -64,7 +69,16 @@ android {
 
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
-            def flavorNames = variant.productFlavors.collect { it.name == "normal" ? "java" : it.name }.join('-')
+            def flavorNames = variant.productFlavors.collect { flavor ->
+                switch (flavor.name) {
+                    case "legacy":
+                        return "java-legacy"
+                    case "normal":
+                        return "java"
+                    default:
+                        return flavor.name
+                }
+            }.join('-')
             // 构建自定义文件名
             def fileName = "TVBox_${variant.buildType.name}-${flavorNames}.apk"
             outputFileName = fileName
